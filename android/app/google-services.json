@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "533690521284",
+    "firebase_url": "https://keyboard-reviews-default-rtdb.firebaseio.com",
+    "project_id": "keyboard-reviews",
+    "storage_bucket": "keyboard-reviews.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533690521284:android:91ec54d9dc8922bba49b91",
+        "android_client_info": {
+          "package_name": "com.jymvideos.keyboard_reviews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "533690521284-0hhm3eaegjuh112vkmhv454glgfaqsg2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jymvideos.keyboard_reviews",
+            "certificate_hash": "da49ebec96e812c4632f240c20d97008cc5e6186"
+          }
+        },
+        {
+          "client_id": "533690521284-u45q5uv1tmgbevtp2m05snnkn9inp5lf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXoYrIBpL8NDZ2ZYX6PJMfW2BhdSa09fo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "533690521284-u45q5uv1tmgbevtp2m05snnkn9inp5lf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
