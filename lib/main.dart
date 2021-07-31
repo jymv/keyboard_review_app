@@ -78,8 +78,16 @@ class _HomeState extends State<Home> {
     _contentRef.child("test_sample").set({"testkey3": "testvalue"});
   }
 
-  void authenticate() {
-    print("authenticate()");
+  void insertKeyboard() {
+    print("insertKeyboard()");
+    var ref = db.reference().child("keyboards");
+    ref.push().set({
+      "designer": "Bloop",
+      "name": "Bloop65",
+      "revision": "n/a",
+      "size": "65%",
+      "msrp": "280"
+    });
   }
 
   @override
@@ -99,16 +107,28 @@ class _HomeState extends State<Home> {
               '$_content',
             ),
             ElevatedButton(
-              onPressed: signInWithGoogle,
-              child: Text("Sign in with Google"),
-            ),
+                onPressed: () async {
+                  var sign = await signInWithGoogle();
+                  print(sign.user!.displayName);
+                  print(sign.user!.uid);
+                  var ref = db.reference().child("users/${sign.user!.uid}");
+                  ref.set({
+                    "display_name": sign.user!.displayName,
+                    "uid": sign.user!.uid,
+                  });
+                },
+                child: Text("Sign in with Google")),
             ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 _googleSignIn.disconnect();
               },
               child: Text("Sign out"),
-            )
+            ),
+            ElevatedButton(
+              onPressed: insertKeyboard,
+              child: Text("Insert Keyboard"),
+            ),
           ],
         ),
       ),
