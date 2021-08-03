@@ -1,8 +1,14 @@
+import 'dart:io';
+
+import 'package:excel/excel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +24,7 @@ class KeyboardApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Home(title: 'Flutter Demo Home Page'),
+      home: Home(title: 'Rotten Keyboards'),
     );
   }
 }
@@ -32,6 +38,56 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
+Future<void> testExcel() async {
+  var excel = Excel.createExcel();
+  Sheet sheetObject = excel['SheetName'];
+
+  CellStyle cellStyle = CellStyle(
+      backgroundColorHex: "#1AFF1A",
+      fontFamily: getFontFamily(FontFamily.Calibri));
+
+  cellStyle.underline = Underline.Single; // or Underline.Double
+
+  var cell = sheetObject.cell(CellIndex.indexByString("A1"));
+  cell.value = 8; // dynamic values support provided;
+  cell.cellStyle = cellStyle;
+
+  // printing cell-type
+  print("CellType: " + cell.cellType.toString());
+
+  ///
+  /// Inserting and removing column and rows
+
+  // insert column at index = 8
+  sheetObject.insertColumn(8);
+
+  // remove column at index = 18
+  sheetObject.removeColumn(18);
+
+  // insert row at index = 82
+  sheetObject.removeRow(82);
+
+  // remove row at index = 80
+  sheetObject.removeRow(80);
+  final directory = await getApplicationDocumentsDirectory();
+  var encoded = excel.encode();
+  if (encoded == null) {
+    return;
+  }
+  File(join(directory.path, "excel.xlsx"))
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(encoded);
+  await OpenFile.open(join(directory.path, "excel.xlsx"));
+}
+
+class Keyboard {
+  String designer;
+  String name;
+  String msrp;
+
+  Keyboard(this.designer, this.name, this.msrp);
+}
+
 class _HomeState extends State<Home> {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -39,6 +95,7 @@ class _HomeState extends State<Home> {
   late DatabaseReference _contentRef;
   var db = FirebaseDatabase();
   GoogleSignIn _googleSignIn = GoogleSignIn();
+  List<Keyboard> keyboards = [];
 
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
@@ -69,73 +126,73 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void insert() {
-    print("insert()");
-    _contentRef = db.reference();
-    _contentRef.child("test_sample").onValue.listen((event) {
-      print(event.snapshot.value);
-    });
-    _contentRef.child("test_sample").set({"testkey3": "testvalue"});
-  }
-
-  void insertKeyboard() {
-    print("insertKeyboard()");
-    var ref = db.reference().child("keyboards");
-    ref.push().set({
-      "designer": "Bloop",
-      "name": "Bloop65",
-      "revision": "n/a",
-      "size": "65%",
-      "msrp": "280"
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_content',
-            ),
-            ElevatedButton(
-                onPressed: () async {
-                  var sign = await signInWithGoogle();
-                  print(sign.user!.displayName);
-                  print(sign.user!.uid);
-                  var ref = db.reference().child("users/${sign.user!.uid}");
-                  ref.set({
-                    "display_name": sign.user!.displayName,
-                    "uid": sign.user!.uid,
-                  });
-                },
-                child: Text("Sign in with Google")),
-            ElevatedButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                _googleSignIn.disconnect();
-              },
-              child: Text("Sign out"),
-            ),
-            ElevatedButton(
-              onPressed: insertKeyboard,
-              child: Text("Insert Keyboard"),
-            ),
-          ],
-        ),
-      ),
+      // body: Center(
+      //   child: Padding(
+      //     padding: const EdgeInsets.all(8.0),
+      //     child: StreamBuilder(
+      //       stream: db.reference().child("keyboards").onValue,
+      //       builder: (context, AsyncSnapshot<Event> snapshot) {
+      //         if (snapshot.hasData) {
+      //           keyboards.clear();
+      //           DataSnapshot dataValues = snapshot.data!.snapshot;
+      //           print(dataValues.value);
+      //           Map<dynamic, dynamic> values = dataValues.value;
+      //           values.forEach((key, v) {
+      //             print(v);
+      //             keyboards.add(new Keyboard(
+      //               v["designer"],
+      //               v["name"],
+      //               v["msrp"],
+      //             ));
+      //           });
+      //         }
+      //         return new GridView.builder(
+      //           // shrinkWrap: true,
+      //           itemCount: keyboards.length,
+      //           itemBuilder: (BuildContext context, int index) {
+      //             return GestureDetector(
+      //               onTap: () {
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(
+      //                     builder: (context) => ReviewsPage(
+      //                         keyboards[index].name,
+      //                         keyboardKey(
+      //                           keyboards[index].designer,
+      //                           keyboards[index].name,
+      //                         )),
+      //                   ),
+      //                 );
+      //               },
+      //               child: Card(
+      //                 child: Text(keyboards[index].name),
+      //               ),
+      //             );
+      //           },
+      //           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+      //             maxCrossAxisExtent: 300,
+      //           ),
+      //         );
+      //       },
+      //     ),
+      //   ),
+      // ),
       floatingActionButton: FloatingActionButton(
-        onPressed: insert,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+        // onPressed: () {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => KeyboardCreatePage()),
+        //   );
+        // },
+        onPressed: testExcel,
+        child: const Icon(Icons.add_sharp),
+        backgroundColor: Colors.green,
       ),
     );
   }
